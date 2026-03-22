@@ -30,6 +30,7 @@
 (show-paren-mode 1)
 (column-number-mode 1)
 (global-display-line-numbers-mode 0)
+(global-diff-hl-mode 1)
 
 ;; use utf-8 for everything
 (set-language-environment "UTF-8")
@@ -67,6 +68,30 @@
 
 (use-package breadcrumb
   :config (breadcrumb-mode 1))
+
+;;; unicode font fallbacks
+
+;; scripts
+(set-fontset-font t 'latin "Noto Sans" nil 'append)
+(set-fontset-font t 'han "Noto Sans CJK JP")
+(set-fontset-font t 'kana "Noto Sans CJK JP")
+(set-fontset-font t 'hangul "Noto Sans CJK JP")
+(set-fontset-font t 'arabic "Noto Sans Arabic")
+(set-fontset-font t 'hebrew "Noto Sans Hebrew")
+(set-fontset-font t 'devanagari "Noto Sans Devanagari")
+(set-fontset-font t 'symbol "Noto Sans Symbols 2" nil 'append)
+;; ranges
+(set-fontset-font t '(#x2600 . #x27bf) "Noto Color Emoji" nil 'append)
+(set-fontset-font t '(#x27c0 . #x2bff) "IBM Plex Math" nil 'append)
+(set-fontset-font t '(#x1d000 . #x1d1ff) "Noto Music" nil 'append)
+(set-fontset-font t '(#x1d400 . #x1d7ff) "IBM Plex Math" nil 'append)
+(set-fontset-font t '(#x1df00 . #x1dfff) "Andika" nil 'append)
+(set-fontset-font t '(#x1f000 . #x1faff) "Noto Color Emoji")
+(set-fontset-font t '(#x20000 . #x2fa1f) "Plangothic P1" nil 'append)
+(set-fontset-font t '(#x30000 . #x323af) "Plangothic P2" nil 'append)
+;; last resort
+(set-fontset-font t 'unicode "Unifont" nil 'append)
+(set-fontset-font t 'unicode "Unifont Upper" nil 'append)
 
 ;;; completion
 
@@ -201,9 +226,16 @@
 (use-package flymake
   :bind ("<left-fringe> <mouse-3>" . flymake-show-project-diagnostics))
 
+(require 'treesit)
+(add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-ts-mode))
+(add-to-list 'treesit-language-source-alist
+             '(rust "https://github.com/tree-sitter/tree-sitter-rust"))
+
 (use-package eglot
   :bind ("C-." . eglot-code-actions)
-  :hook (rustic-mode . eglot-ensure)
+  :hook (rust-ts-mode . (lambda ()
+                          (eglot-ensure)
+                          (add-hook 'before-save-hook #'eglot-format-buffer nil t)))
   :config
   (setq-default
    eglot-workspace-configuration
@@ -218,10 +250,6 @@
        (:enable t)
        :closureReturnTypeHints
        (:enable "always"))))))
-
-(use-package rustic
-  :hook (rustic-mode . (lambda () (add-hook 'before-save-hook #'eglot-format-buffer nil t)))
-  :config (setq rustic-lsp-client 'eglot))
 
 (use-package web-mode
   :mode ("\\.html?\\'" . web-mode))

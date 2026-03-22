@@ -95,7 +95,6 @@ If no vowel is found, insert FALLBACK instead."
               (delete-region (car extent) (cdr extent))
               (goto-char (car extent))
               (insert new-str)
-              (setq toaq--last-diacritic (cons (copy-marker (car extent)) combining-char))
               (goto-char (if (<= target-pos original-pos)
                              (+ original-pos delta)
                            original-pos))))
@@ -213,8 +212,8 @@ If the escape flag is set, insert a literal backtick instead."
       (use-local-map (keymap-parent toaq-keymap)))))
 
 (with-eval-after-load 'quail
-  (add-to-list 'input-method-activate-hook #'toaq-activate)
-  (add-to-list 'input-method-deactivate-hook #'toaq-deactivate))
+  (add-hook 'input-method-activate-hook #'toaq-activate)
+  (add-hook 'input-method-deactivate-hook #'toaq-deactivate))
 
 (provide 'toaq)
 

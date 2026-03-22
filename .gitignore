@@ -6,6 +6,5 @@ games
 .mc-lists.el
 multisession
 recentf
-tramp
-transient
+tr*
 url
